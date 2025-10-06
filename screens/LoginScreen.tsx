@@ -32,19 +32,37 @@ export default function LoginScreen({ navigation }: any) {
 
   async function signUp() {
     setLoading(true)
-    const { error, data } = await supabase.auth.signUp({ email, password })
+    console.log('Starting signup...', { email })
 
-    if (error) {
-      Alert.alert('Sign up failed', error.message)
-    } else {
-      // Create profile
-      await supabase.from('user_profiles').insert({
-        id: data.user!.id,
-        email: email,
-        onboarded: false
-      })
-      navigation.replace('Onboarding')
+    try {
+      const { error, data } = await supabase.auth.signUp({ email, password })
+      console.log('Signup response:', { error, data })
+
+      if (error) {
+        console.error('Signup error:', error)
+        Alert.alert('Sign up failed', error.message)
+      } else {
+        // Create profile
+        console.log('Creating profile for user:', data.user!.id)
+        const { error: profileError } = await supabase.from('user_profiles').insert({
+          id: data.user!.id,
+          email: email,
+          onboarded: false
+        })
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError)
+          Alert.alert('Profile creation failed', profileError.message)
+        } else {
+          console.log('Navigating to Onboarding...')
+          navigation.replace('Onboarding')
+        }
+      }
+    } catch (err) {
+      console.error('Unexpected error during signup:', err)
+      Alert.alert('Error', 'An unexpected error occurred')
     }
+
     setLoading(false)
   }
 

@@ -32,9 +32,17 @@ export default async function handler(req: any, res: any) {
           content: [
             {
               type: "text",
-              text: `Analyze this object/item and infer personality traits about someone who values this object.
+              text: `Analyze this object/item and infer personality traits about someone who values this object. Focus on emotional characteristics, values, and how they connect with others.
+
+Consider:
+- Emotional depth and expressiveness
+- Communication style and openness
+- Core values and what drives them
+- How they form connections
+- Their approach to relationships
+
 Return ONLY valid JSON in this exact format (no markdown, no code blocks):
-{"traits": ["trait1", "trait2", "trait3", "trait4", "trait5"], "vibe": "one-word-vibe", "description": "1-sentence description"}`
+{"traits": ["trait1", "trait2", "trait3", "trait4", "trait5"], "vibe": "one-word-vibe", "description": "1-sentence description focusing on emotional connection style"}`
             },
             {
               type: "image_url",

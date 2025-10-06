@@ -59,7 +59,7 @@ export default async function handler(req: any, res: any) {
       return res.status(200).json({ matches: [] })
     }
 
-    // Calculate "opposite" scores (using distance instead of similarity)
+    // Calculate emotional connection scores
     const scores = await Promise.all(
       allUsers.map(async (otherUser) => {
         const otherEmbedding = await openai.embeddings.create({
@@ -74,14 +74,20 @@ export default async function handler(req: any, res: any) {
         const magnitude2 = Math.sqrt(otherVector.reduce((sum: number, val: number) => sum + val * val, 0))
         const similarity = dotProduct / (magnitude1 * magnitude2)
 
-        // Distance (opposite of similarity) - higher distance = more opposite
-        const distance = 1 - similarity
+        // Emotional connection score: balance between similarity and complementarity
+        // Use a "sweet spot" formula: peak connection at ~60-75% similarity
+        // This captures shared values while maintaining intrigue from differences
+        const optimalSimilarity = 0.675 // Sweet spot for emotional connection
+        const connectionScore = 1 - Math.abs(similarity - optimalSimilarity) * 2
 
-        return { userId: otherUser.id, score: distance }
+        // Normalize to 0-1 range
+        const normalizedScore = Math.max(0, Math.min(1, connectionScore))
+
+        return { userId: otherUser.id, score: normalizedScore }
       })
     )
 
-    // Get top 3 most opposite
+    // Get top 3 highest emotional connection scores
     const topMatches = scores.sort((a, b) => b.score - a.score).slice(0, 3)
 
     // Save matches
